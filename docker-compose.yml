@@ -1,0 +1,76 @@
+# File: docker-compose.yml
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: Admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    networks:
+      - backend
+
+  django:
+    build:
+      context: ./django_app
+    env_file: .env
+    volumes:
+      - ./django_app:/app
+      - static_volume:/app/staticfiles
+    ports:
+      - "8001:8000"
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py createsuperuser --noinput || true &&
+      gunicorn config.wsgi:application -b 0.0.0.0:8000 -w 4
+      "
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  fastapi:
+    build:
+      context: ./fastapi_app
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+    volumes:
+      - ./fastapi_app:/app
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - db
+      - redis
+    networks:
+      - backend
+
+volumes:
+  db-data:
+  static_volume:
+
+networks:
+  backend:

@@ -1,0 +1,2 @@
+# fastapi_app/alembic_ini_placeholder.txt
+# Use alembic for migrations; configure env.py to use core.DATABASE_URL

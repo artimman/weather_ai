@@ -1,0 +1,10 @@
+Django>=4.2,<5
+psycopg2-binary
+gunicorn
+djangorestframework
+requests
+python-dotenv
+whitenoise
+djangorestframework-simplejwt
+python-jose
+python-jose[cryptography]

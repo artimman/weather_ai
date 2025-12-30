@@ -1,0 +1,26 @@
+# Ignore
+_Dokumenty
+_docs
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*.log
+*.sqlite3
+
+# Envs
+.env
+venv/
+.envrc
+
+# Docker
+*.pid
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

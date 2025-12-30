@@ -1,0 +1,1 @@
+# INFO: Plik jest wymagany, bez tego config.settings nie istnieje dla Pythona!
