@@ -115,8 +115,8 @@ Example payload:
 ```json
 {
   "name": "Warsaw",
-  "lat": 52.2297,
-  "lon": 21.0122
+  "lat": 52.229845,
+  "lon": 21.011731
 }
 ```
 

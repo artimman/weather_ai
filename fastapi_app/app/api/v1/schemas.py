@@ -5,8 +5,8 @@ from typing import Any, Dict
 
 class LocationIn(BaseModel):
     name: str = Field(example="Warsaw")
-    lat: float = Field(example=52.2297)
-    lon: float = Field(example=21.0122)
+    lat: float = Field(example=52.229845)
+    lon: float = Field(example=21.011731)
 
 
 class WeatherMetrics(BaseModel):
