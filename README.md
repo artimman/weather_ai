@@ -1,6 +1,7 @@
 # Weather AI Platform
 
-AI-powered weather analytics platform built with **Django + FastAPI**, powered by external weather APIs and optional AI analysis.
+AI-powered weather analytics platform built with **Django + FastAPI**.  
+Powered by external weather APIs and optional AI analysis.
 
 ---
 
