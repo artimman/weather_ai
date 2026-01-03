@@ -1,0 +1,30 @@
+<div class="card shadow-sm border-secondary">
+    <div class="card-header bg-secondary text-white">
+        <strong>AI Weather Analysis</strong>
+    </div>
+    <div class="card-body">
+        {% if report.mode == "ai" %}
+            <!-- AI report, TODO! -->
+            <h5 class="card-title mb-3">{{ report.location|default:"Location" }}</h5>
+            <p class="fw-semibold">
+                {{ report.summary }}
+            </p>
+            <hr>
+            <div class="small text-muted">
+                {{ report.expert_notes|linebreaks }}
+            </div>
+        {% else %}
+            <!-- fallback, gdy AI wyłączone -->
+            <h5 class="mb-3">{{ report.location }}</h5>
+            <ul class="list-unstyled">
+                <li>Temperature: {{ report.metrics.temperature }} °C</li>
+                <li>Wind: {{ report.metrics.wind_kph }} km/h</li>
+                <li>Wind chill: {{ report.metrics.wind_chill }} °C</li>
+                <li>Heat index: {{ report.metrics.heat_index }} °C</li>
+            </ul>
+            <div class="alert alert-info mt-3 mb-0">
+                AI analysis is currently disabled.
+            </div>
+        {% endif %}
+    </div>
+</div>

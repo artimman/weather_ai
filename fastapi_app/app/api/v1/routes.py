@@ -1,70 +1,85 @@
 # fastapi_app/app/api/v1/routes.py
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+import logging
 
-from .schemas import LocationIn, ReportOut, WeatherOut
-from ...services.db import get_db
-from ...ai.pipeline import generate_full_report
-from ...core.security import get_current_user
+from app.ai.pipeline import generate_full_report
+from app.api.v1.schemas import LocationIn, ReportResponse, WeatherOut
+from app.core.security import get_current_user
+from app.services.db import get_db
+from app.services.geocoding import geocode_city
+from app.services.metrics import compute_heat_index, compute_wind_chill
+from app.services.weather_fetcher import fetch_weather_openweather, normalize_weather
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/reports", tags=["Weather Reports"])
 
+
 @router.post(
     "/generate",
-    response_model=ReportOut,
-    summary="Generate extended AI weather report",
-    description="""
-Generates a full weather analysis:
-- fetch raw weather data
-- normalize metrics
-- compute expert indexes (wind chill, heat index)
-- generate AI summary
-- store report in PostgreSQL
-"""
+    response_model=ReportResponse,
+    summary="Generate AI weather report or weather-only fallback",
+    responses={
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+        500: {"description": "Internal error"},
+    },
 )
 async def generate_report(
-        location: LocationIn,
-        user=Depends(get_current_user),
-        db: Session = Depends(get_db)
-    ):
-    # TODO!
-    # try:
-    #     result = await generate_full_report(location.dict(), db)
-    #     return result
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
-    raise HTTPException(501, "AI reports disabled (WIP)")
+    location: LocationIn,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    AI_PROVIDER=openai  -> AI report
+    AI_PROVIDER=none    -> weather-only fallback
+    """
+    return await generate_full_report(
+        location_q=location.dict(),
+        db=db,
+    )
 
 
 @router.post(
     "/weather",
     response_model=WeatherOut,
-    summary="Fetch and compute weather data (no AI)",
+    summary="Fetch weather data without AI",
+    responses={
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+        500: {"description": "Internal error"},
+    },
 )
 async def weather_only(
     location: LocationIn,
     user=Depends(get_current_user),
-    db: Session = Depends(get_db),
 ):
-    from ...services.weather_fetcher import fetch_weather_openweather, normalize_weather
-    from ...services.metrics import compute_wind_chill, compute_heat_index
+    try:
+        lat, lon = await geocode_city(location.name)
 
-    raw = await fetch_weather_openweather(location.lat, location.lon)
-    normalized = await normalize_weather(raw)
+        raw = await fetch_weather_openweather(lat, lon)
+        normalized = await normalize_weather(raw)
 
-    current = normalized["current"]
-    temp = current.get("temp")
-    wind_ms = current.get("wind_speed", 0)
-    wind_kph = wind_ms * 3.6
+        current = normalized["current"]
+        temp = current.get("temp")
+        wind_ms = current.get("wind_speed", 0)
+        wind_kph = wind_ms * 3.6
 
-    return {
-        "location": location.name,
-        "metrics": {
-            "temperature": temp,
-            "wind_kph": round(wind_kph, 1),
-            "wind_chill": compute_wind_chill(temp, wind_kph),
-            "heat_index": compute_heat_index(temp, current.get("humidity", 0)),
-        },
-        "weather": normalized,
-    }
+        return {
+            "location": location.name,
+            "metrics": {
+                "temperature": temp,
+                "wind_kph": round(wind_kph, 1),
+                "wind_chill": compute_wind_chill(temp, wind_kph),
+                "heat_index": compute_heat_index(
+                    temp,
+                    current.get("humidity", 0),
+                ),
+            },
+            "weather": normalized,
+        }
+
+    except Exception as exc:
+        logger = logging.getLogger("uvicorn.error")
+        logger.exception("Weather fetch failed: %s", exc)
+        raise

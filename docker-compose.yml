@@ -3,6 +3,7 @@
 services:
   db:
     image: postgres:15
+    container_name: db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -41,11 +42,11 @@ services:
     command: >
       sh -c "
       python manage.py migrate &&
-      python manage.py createsuperuser --noinput || true &&
-      gunicorn config.wsgi:application -b 0.0.0.0:8000 -w 4
+      python manage.py runserver 0.0.0.0:8000
       "
     depends_on:
       - db
+      - fastapi
     networks:
       - backend
 

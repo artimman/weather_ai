@@ -1,18 +1,21 @@
 # Weather AI Platform
 
-AI-powered weather analytics platform built with **Django + FastAPI**.  
-Powered by external weather APIs and optional AI analysis.
+Weather analytics platform built with **Django + FastAPI**.  
+Provides real-time weather data with **optional AI-powered expert analysis**.  
+
+The application is designed with a **microservice-style architecture**, feature flags, and graceful AI fallback.  
 
 ---
 
 ## Features
 
-- Weather data fetching (OpenWeather)
+- Real-time weather data (OpenWeather API)
 - Advanced weather metrics (wind chill, heat index)
-- Optional AI-generated expert weather reports
-- JWT authentication (Django -> FastAPI shared auth)
-- PostgreSQL persistence
-- Redis caching (optional)
+- Optional AI-generated weather analysis
+- Automatic fallback when AI is disabled or unavailable
+- JWT authentication (Django → FastAPI)
+- Feature flag support (`AI_PROVIDER`)
+- HTMX-powered UI (no SPA framework)
 - Fully Dockerized
 - Auto-generated OpenAPI / Swagger docs
 
@@ -20,28 +23,45 @@ Powered by external weather APIs and optional AI analysis.
 
 ## Architecture
 
-project/  
-    |- django_app/ # Auth, Admin, JWT  
-    |- fastapi_app/ # Weather & AI API  
-    |- docker-compose.yml  
-    |- .env.example  
-    |- README.md  
+Browser  
+  |  
+  |-- Django (UI, Auth, Admin)  
+  | |  
+  | |-- JWT (HttpOnly cookies)  
+  |  
+  |-- FastAPI (Weather API, AI reports)  
+  |  
+  |-- OpenWeather API  
+  |-- Optional AI Provider 
 
-**Auth flow**
-- Django issues JWT tokens
-- FastAPI validates JWT using shared secret
+### services
+
+project/  
+  |- django_app/ # Auth, Admin, JWT  
+  |- fastapi_app/ # Weather & AI API  
+  |- docker-compose.yml  
+  |- .env.example  
+  |- README.md  
+
+
+## Authentication Flow
+
+- User logs in via Django  
+- Django issues JWT (HttpOnly cookie)  
+- FastAPI validates JWT using shared secret  
+- Django Admin uses Django session auth  
 
 ---
 
 ## Quick start (Docker)
 
-### Clone repo
+### Clone repository
 ```bash
 git clone https://github.com/artimman/weather_ai.git
 cd weather_ai
 ```
 
-## Create .env
+## Create environment file
 
 ```bash
 cp .env.example .env
@@ -49,9 +69,10 @@ cp .env.example .env
 
 **Copy `.env.example` to `.env` and fill values.**  
 
-DJANGO_SECRET_KEY  
-OPENWEATHER_API_KEY  
-optional OPENAI_API_KEY  
+DJANGO_SECRET_KEY=
+OPENWEATHER_API_KEY=
+OPENAI_API_KEY=  # optional
+AI_PROVIDER=openai  # or "none"
 
 ## Run stack
 
@@ -63,10 +84,11 @@ docker compose up -d --build
 
 **Service URL**
 
-Django Admin http://localhost:8001/admin  
-FastAPI Docs http://localhost:8000/docs  
-FastAPI Health http://localhost:8000/health  
-PgAdmin http://localhost:5050  
+Django UI / Login: http://localhost:8001/login/  
+Django Admin: http://localhost:8001/admin/  
+FastAPI Docs: http://localhost:8000/docs  
+FastAPI Health: http://localhost:8000/health  
+PgAdmin: http://localhost:5050  
 
 ## Authentication
 
@@ -114,9 +136,7 @@ Example payload:
 
 ```json
 {
-  "name": "Warsaw",
-  "lat": 52.229845,
-  "lon": 21.011731
+  "name": "Warsaw"
 }
 ```
 
@@ -127,16 +147,24 @@ POST /api/v1/reports/generate
 ```
 
 Requires AI_PROVIDER=openai and valid API key  
-Can be disabled with AI_PROVIDER=none  
+If AI is disabled or unavailable, API returns weather-only report  
 
 ## Configuration
 
 | Variable | Description |
 |----------|-------------|
 | OPENWEATHER_API_KEY | Weather data provider |
-| AI_PROVIDER | none, openai, groq, gemini |
+| AI_PROVIDER | none / openai (groq, gemini) |
+| OPENAI_API_KEY | Required if AI enabled |
 | DATABASE_URL | PostgreSQL connection |
 | DJANGO_SECRET_KEY | Shared JWT secret |
+
+## Known Limitations
+
+- No background task queue (Celery / RQ)  
+- No rate limiting on API endpoints  
+- AI usage billing is not handled  
+- No long-term weather history storage  
 
 ## Development
 

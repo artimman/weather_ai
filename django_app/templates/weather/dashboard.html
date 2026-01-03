@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <!-- Dashboard content -->
+    <main class="container py-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="fw-bold mb-0">Weather Dashboard</h1>
+        </div>
+        <form 
+            class="row g-4"
+            hx-get="{% url 'accounts:weather_view' %}"
+            hx-target="#weather_container"
+            hx-swap="innerHTML"
+        >
+            <div class="col-md-6 text-end lh-lg d-none d-md-block">
+                <label class="form-label mb-0">City</label>
+            </div>
+            <div class="col col-md-4">
+                <input
+                    type="text"
+                    id="location_input"
+                    name="location"
+                    class="form-control"
+                    placeholder="e.g. Warsaw"
+                    required
+                >
+            </div>
+            <div class="col-auto col-md-2">
+                <button class="btn btn-primary w-100 dbm-btn-primary">Get weather</button>
+            </div>
+        </form>
+        <div
+            class="mt-4"
+            id="weather_container"
+            hx-get="{% url 'accounts:weather_view' %}"
+            hx-trigger="load"
+            hx-swap="innerHTML"
+        >
+            <div class="card shadow-sm bg-light">
+                <div class="card-body text-center text-muted py-5">
+                    <div class="spinner-border mb-2"></div>
+                    <div>Loading weather data...</div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 text-end">
+            <button
+                class="btn btn-primary dbm-btn-primary"
+                hx-get="{% url 'accounts:ai_report' %}"
+                hx-target="#ai_container"
+                hx-swap="innerHTML"
+                hx-include="#location_input"
+            >
+                Generate AI report
+            </button>
+        </div>
+        <div class="mt-4" id="ai_container"></div>
+    </main>
+{% endblock %}

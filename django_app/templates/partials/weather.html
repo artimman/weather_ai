@@ -1,0 +1,30 @@
+<!-- Partial Weather -->
+<div class="card shadow-sm bg-light">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0 fw-semibold">{{ data.location }}</h5>
+            <span class="badge bg-success">Live</span>
+        </div>
+        <div class="row text-center">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="fw-bold fs-4">{{ data.metrics.temperature }}°C</div>
+                <div class="text-muted small">Temperature</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="fw-bold fs-4">{{ data.metrics.wind_kph }}</div>
+                <div class="text-muted small">Wind (km/h)</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="fw-bold fs-5">{{ data.metrics.wind_chill }}</div>
+                <div class="text-muted small">Wind Chill</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="fw-bold fs-5">{{ data.metrics.heat_index }}</div>
+                <div class="text-muted small">Heat Index</div>
+            </div>
+        </div>
+        <div class="border-top pt-3 text-muted small">
+            <p class="m-0">{{ data.weather.current.weather.0.description|capfirst }}</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+# File: docker-compose.prod.yml
+
+services:
+  django:
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings_prod
+    volumes:
+      - static_volume:/app/staticfiles
+    ports:
+      - "8001:8000"

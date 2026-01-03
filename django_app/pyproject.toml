@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 88
+target-version = ['py313']
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = ["Q", "W", "I"]
+
+[tool.ruff.format]
+quote-style = "double"

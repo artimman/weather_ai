@@ -1,12 +1,13 @@
 # fastapi_app/app/core/security.py
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError # zainstalowane w Docker (Python)
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt  # zainstalowane w Docker (Python)
 
 from .config import DJANGO_SECRET_KEY, JWT_ALGORITHM
 
 security = HTTPBearer(auto_error=True)
+
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),

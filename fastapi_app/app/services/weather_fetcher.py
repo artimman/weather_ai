@@ -1,6 +1,7 @@
 # fastapi_app/app/services/weather_fetcher.py
 
 import os
+
 import httpx
 
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
@@ -9,8 +10,10 @@ OPENWEATHER_BASE_URL = os.getenv(
     "https://api.openweathermap.org/data/2.5",
 )
 
+
 class WeatherProviderError(RuntimeError):
     pass
+
 
 async def fetch_weather_openweather(lat: float, lon: float) -> dict:
     if not OPENWEATHER_API_KEY:
@@ -28,6 +31,7 @@ async def fetch_weather_openweather(lat: float, lon: float) -> dict:
         r = await client.get(url, params=params)
         r.raise_for_status()
         return r.json()
+
 
 async def normalize_weather(raw: dict) -> dict:
     return {

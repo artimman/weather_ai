@@ -1,7 +1,7 @@
 # fastapi_app/app/main.py
 
+from app.api.v1.schemas import HealthOut
 from fastapi import FastAPI
-from fastapi.security import HTTPBearer
 
 from .api.v1 import routes as v1_routes
 
@@ -24,24 +24,23 @@ Features:
     openapi_tags=[
         {
             "name": "Authentication",
-            "description": "JWT authentication handled by Django"
+            "description": "JWT authentication handled by Django",
         },
         {
             "name": "Weather Reports",
-            "description": "Weather data, metrics and forecasts"
+            "description": "Weather data, metrics and forecasts",
         },
-        {
-            "name": "System",
-            "description": "Infrastructure & health endpoints"
-        },
-    ]
+        {"name": "System", "description": "Infrastructure & health endpoints"},
+    ],
 )
 
 app.include_router(v1_routes.router, prefix="/api/v1")
 
+
 @app.get(
     "/health",
     tags=["System"],
+    response_model=HealthOut,
     summary="Health check",
 )
 async def health():

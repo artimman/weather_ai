@@ -1,8 +1,10 @@
 # fastapi_app/app/models/report.py
 
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Text
+from sqlalchemy import JSON, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
+
 from ..services.db import Base
+
 
 class Report(Base):
     __tablename__ = "reports"

@@ -1,8 +1,8 @@
 # fastapi_app/app/core/config.py
 
 import os
-
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -15,3 +15,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 DJANGO_SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+
+# AI_PROVIDER jako funkcja (zamiast stałej)
+def get_ai_provider():
+    return os.getenv("AI_PROVIDER", "openai")

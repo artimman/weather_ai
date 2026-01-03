@@ -1,9 +1,10 @@
 # Ignore
-_Dokumenty
-_docs
+_Dokumenty/
+_docs/
 .github
 
 # Python
+staticfiles/
 __pycache__/
 *.py[cod]
 *.log

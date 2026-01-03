@@ -1,0 +1,36 @@
+/* 
+	Custom CSS
+*/
+
+:root {
+	/* Definicja palety kolorów w jednym miejscu */
+	--dbm-primary: #417690;
+	--dbm-primary-light: #609ab6;
+	--dbm-primary-lighter: #79aec8;
+}
+
+.dbm-bg-primary {
+	background-color: var(--dbm-primary) !important;
+}
+
+.dbm-bg-primary-light {
+	background-color: var(--dbm-primary-light) !important;
+}
+
+.dbm-bg-primary-lighter {
+	background-color: var(--dbm-primary-lighter) !important;
+}
+
+.dbm-btn-primary {
+	background-color: var(--dbm-primary-light);
+	border-color: var(--dbm-primary);
+	transition: background-color 0.2s ease; /* Płynne przejście koloru */
+}
+
+.dbm-btn-primary:hover {
+	background-color: var(--dbm-primary);
+}
+
+.dbm-btn-primary:active, .dbm-btn-primary:focus {
+	background-color: var(--dbm-primary) !important;
+}

@@ -1,49 +1,49 @@
 # fastapi_app/app/ai/providers.py
 
-import os
 from abc import ABC, abstractmethod
+
+from openai import OpenAI
+
 
 class BaseProvider(ABC):
     @abstractmethod
     def generate(self, prompt: str, **kwargs):
         raise NotImplementedError
 
-class OpenAIProvider(BaseProvider):
-    def __init__(self, api_key: str):
-        import openai
-        openai.api_key = api_key
-        self.client = openai
 
-    def generate(self, prompt: str, **kwargs):
-        # synchronous example; production should be async and streaming-capable
-        resp = self.client.Completion.create(
-            engine=kwargs.get("engine", "text-davinci-003"),
-            prompt=prompt,
-            max_tokens=kwargs.get("max_tokens", 500),
-            temperature=kwargs.get("temperature", 0.2),
+class OpenAIProvider:
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
+
+    def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 500,
+        temperature: float = 0.2,
+    ) -> str:
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",  # lub gpt-4o / gpt-3.5-turbo
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a professional meteorologist.",
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            max_tokens=max_tokens,
+            temperature=temperature,
         )
-        return resp["choices"][0]["text"].strip()
+
+        return response.choices[0].message.content.strip()
+
 
 def get_provider(name: str, api_key: str):
     if name == "openai":
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is missing")
         return OpenAIProvider(api_key)
-    # add Groq/Gemini implementations similarly
-    raise ValueError("Unknown provider")
 
-
-# TODO!
-
-# class NoAIProvider(BaseProvider):
-#     def generate(self, prompt: str, **kwargs):
-#         raise RuntimeError("AI provider disabled")
-
-
-# def get_provider(name: str, api_key: str):
-#     if name in ("none", "", None):
-#         return NoAIProvider()
-
-#     if name == "openai":
-#         from .openai_provider import OpenAIProvider
-#         return OpenAIProvider(api_key)
-
-#     raise ValueError("Unknown provider")
+    raise RuntimeError(f"Unknown AI provider: {name}")

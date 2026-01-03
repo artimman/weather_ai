@@ -1,27 +1,67 @@
 # fastapi_app/app/api/v1/schemas.py
 
+from typing import Optional, Union
+
 from pydantic import BaseModel, Field
-from typing import Any, Dict
+
+# ===== INPUT =====
+
 
 class LocationIn(BaseModel):
     name: str = Field(example="Warsaw")
-    lat: float = Field(example=52.229845)
-    lon: float = Field(example=21.011731)
 
 
-class WeatherMetrics(BaseModel):
+# ===== METRICS =====
+
+
+class MetricsOut(BaseModel):
     temperature: float
     wind_kph: float
     wind_chill: float
     heat_index: float
 
 
+# ===== WEATHER =====
+
+
+class WeatherCurrentOut(BaseModel):
+    temp: float
+    humidity: int
+    wind_speed: float
+    weather: list[dict]
+
+
+class WeatherPayloadOut(BaseModel):
+    current: WeatherCurrentOut
+
+
 class WeatherOut(BaseModel):
     location: str
-    metrics: WeatherMetrics
-    weather: Dict[str, Any]
+    metrics: MetricsOut
+    weather: WeatherPayloadOut
 
 
-class ReportOut(BaseModel):
+# ===== HEALTH =====
+
+
+class HealthOut(BaseModel):
+    status: str
+
+
+# ===== AI / FALLBACK RESPONSES =====
+
+
+class WeatherOnlyOut(BaseModel):
+    mode: str = "weather-only"
+    location: str
+    metrics: MetricsOut
+
+
+class AIReportOut(BaseModel):
+    mode: str = "ai"
     report_id: str
     summary: str
+    expert_notes: Optional[str] = None
+
+
+ReportResponse = Union[WeatherOnlyOut, AIReportOut]

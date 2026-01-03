@@ -1,17 +1,19 @@
 # django_app/config/settings.py
 
 import os
-
-from pathlib import Path
-from dotenv import load_dotenv
 from datetime import timedelta
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret")
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"  # or True
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(
+    ","
+)  # or ["*"] (look DJANGO_ALLOWED_HOSTS in .env)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -21,11 +23,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    # "rest_framework.authtoken",
-    "users",
     "weather",
 ]
 
+# Ważna jest kolejność middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -33,6 +34,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.JWTAuthCookieMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -48,8 +50,8 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth", # wymgane przez admin
-                "django.contrib.messages.context_processors.messages", # wymgane przez admin
+                "django.contrib.auth.context_processors.auth",  # wymgane przez admin
+                "django.contrib.messages.context_processors.messages",  # wymgane przez admin
             ]
         },
     }
@@ -69,32 +71,33 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
 ]
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
 # Basic DRF settings
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework.authentication.SessionAuthentication",),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
 }
 
 # Integration settings
 FASTAPI_BASE_URL = os.getenv("FASTAPI_BASE_URL", "http://fastapi:8000")
 
-# [?] whitenoise
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # Konfiguracja JWT
-REST_FRAMEWORK.update({
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-})
+REST_FRAMEWORK.update(
+    {
+        "DEFAULT_AUTHENTICATION_CLASSES": (
+            "rest_framework_simplejwt.authentication.JWTAuthentication",
+        ),
+    }
+)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
@@ -102,3 +105,28 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
+
+# Logging
+LOGGING = {
+    "version": 1,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
+}
+
+# Urls settings
+# Uwaga: w Docker Compose używaj nazw serwisów, nie localhost (patrz do .env)
+DJANGO_API_BASE_URL = os.getenv(
+    "DJANGO_API_BASE_URL",
+    "http://django:8000/api",
+)
+
+FASTAPI_API_BASE_URL = str(
+    os.getenv("FASTAPI_API_BASE_URL", "http://fastapi:8000/api/v1")
+)
+
+# Ustawienia logowania django_app\templates\auth\login.html
+LOGIN_URL = "/login/"
+
+LOGIN_REDIRECT_URL = "/weather/dashboard/"
+
+LOGOUT_REDIRECT_URL = "/login/"

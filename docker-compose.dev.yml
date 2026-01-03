@@ -1,0 +1,12 @@
+# File: docker-compose.dev.yml
+
+services:
+  django:
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings_dev
+    volumes:
+      - ./django_app:/app
+    ports:
+      - "8001:8000"
+    command: python manage.py runserver 0.0.0.0:8000
