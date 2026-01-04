@@ -57,7 +57,7 @@ project/
 
 ### Clone repository
 ```bash
-git clone https://github.com/artimman/weather_ai.git
+git clone https://github.com/designbymalina/weather_ai.git
 cd weather_ai
 ```
 
